@@ -1,0 +1,29 @@
+services:
+  flask:
+    restart: unless-stopped
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app:/app/app
+      - ./logs:/app/logs
+      - ./huggingface_cache:/app/huggingface_cache
+    environment:
+      - HF_HOME=/app/huggingface_cache
+      - PYTHONUNBUFFERED=1
+      - PYTHONFAULTHANDLER=1
+      - TRANSFORMERS_OFFLINE=0
+      - OMP_NUM_THREADS=4
+      - TF_NUM_INTRAOP_THREADS=4
+      - TF_NUM_INTEROP_THREADS=2
+    deploy:
+      resources:
+        limits:
+            memory: 8G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    stdin_open: true
+    tty: true
