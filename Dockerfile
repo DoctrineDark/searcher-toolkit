@@ -2,8 +2,7 @@ FROM python:3.10
 
 WORKDIR /app
 
-#RUN mkdir -p ${HF_HOME} && chmod -R 777 ${HF_HOME}
-RUN mkdir -p /app/huggingface_cache && chmod -R 777 /app/huggingface_cache
+RUN mkdir -p ${HF_HOME} && chmod -R 777 ${HF_HOME}
 
 COPY requirements.txt .
 
