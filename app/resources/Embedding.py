@@ -3,7 +3,6 @@ from .Controller import Controller
 import logging
 import threading
 
-# Импортируем предзагруженные объекты из main.py
 from __main__ import _model_cache, _tokenizer_cache, MODEL_NAME
 
 _cache_lock = threading.Lock()
@@ -20,13 +19,11 @@ class Embedding(Controller):
                 return {"success": False, "error": "Content is required"}, 400
 
             current_app.logger.info(f"Processing content: {content[:200]}...")
-
-            # Берём модель и токенизатор из кэша
+            
             with _cache_lock:
                 tokenizer = _tokenizer_cache[model_name]
                 model = _model_cache[model_name]
-
-            # Токенизация
+                
             tokens = tokenizer(
                 content,
                 return_tensors='pt',
@@ -34,8 +31,7 @@ class Embedding(Controller):
                 max_length=512
             )
             token_count = tokens.input_ids.shape[1]
-
-            # Векторизация
+            
             encoded = model.encode(
                 [content],
                 max_length=min(token_count, 512)

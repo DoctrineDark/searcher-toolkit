@@ -8,7 +8,7 @@ import psutil
 from transformers import AutoTokenizer
 from FlagEmbedding import BGEM3FlagModel
 
-# ==== Конфиг offload ====
+# ==== offload ====
 MODEL_NAME = "BAAI/bge-m3"
 CACHE_FOLDER = "/app/models"
 OFFLOAD_FOLDER = "/app/offload"
@@ -21,7 +21,7 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ==== Кэш модели и токенизатора ====
+# ==== Model & Tokenizer cache ====
 _model_cache = {}
 _tokenizer_cache = {}
 
@@ -31,11 +31,8 @@ def log_memory(stage):
     mem_mb = process.memory_info().rss / 1024 / 1024
     logger.info(f"Memory {stage}: {mem_mb:.2f} MB")
 
-# ==== Предзагрузка ====
-def preload_model():
-							  
+def preload_model():		  
     log_memory("before preload")
-
 										  
     logger.info(f"Preloading tokenizer for {MODEL_NAME}...")
     _tokenizer_cache[MODEL_NAME] = AutoTokenizer.from_pretrained(
@@ -50,7 +47,7 @@ def preload_model():
     _model_cache[MODEL_NAME] = BGEM3FlagModel(
         MODEL_NAME,
         device='cpu',
-        use_fp16=True,  # половинная точность → меньше RAM
+        use_fp16=True,
         cache_folder=CACHE_FOLDER,
         model_kwargs={
             "device_map": "auto",
@@ -62,14 +59,14 @@ def preload_model():
 
 preload_model()
 
-# ==== Роуты ====
+# ==== Routing ====
 from resources.Home import Home
 from resources.Embedding import Embedding
 
 app.add_url_rule('/', view_func=Home.index, methods=['GET'])
 app.add_url_rule('/embedding', view_func=Embedding.vectorize, methods=['POST'])
 
-# ==== Старт сервера ====
+# ==== Server ====
 if __name__ == '__main__':
     logger.info("Starting server...")
     log_memory("before serve_forever")
